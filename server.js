@@ -22,8 +22,8 @@ app.get('/', async (req, res) => {
 
 app.use('/articles', articleRouter);
 
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('client/build'));
-}
+// if (process.env.NODE_ENV === 'production') {
+//     app.use(express.static('build'));
+// }
 
 app.listen(PORT);
