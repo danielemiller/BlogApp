@@ -1,15 +1,29 @@
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 const Article = require('./models/article');
 const articleRouter = require('./routes/articles');
 const methodOverride = require('method-override');
-const app = express();
 
+require('dotenv').config();
+
+const app = express();
 const PORT = process.env.port || 5000
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/blog', { 
-    useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true 
+app.use(cors());
+app.use(express.json());
+
+const uri = process.env.ATLAS_URI;
+mongoose.connect(uri || 'mongodb://localhost/blog', { 
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true 
 })
+
+const connection = mongoose.connection
+connection.once("open", () => {
+    console.log(('MongoDB database connection established'));
+});
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
@@ -26,4 +40,6 @@ app.use('/articles', articleRouter);
 //     app.use(express.static('build'));
 // }
 
-app.listen(PORT);
+app.listen(PORT, () => {
+    console.log('Server is running');
+});
