@@ -2,14 +2,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Article = require('./models/article');
 const articleRouter = require('./routes/articles');
+const methodOverride = require('method-override');
 const app = express();
 
-mongoose.connect('mongodb://localhost/blog', { 
+const PORT = process.env.port || 5000
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/blog', { 
     useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true 
 })
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride('_method'));
 
 app.get('/', async (req, res) => {
     const articles = await Article.find().sort({ createdAt: 'desc' });
@@ -18,4 +22,8 @@ app.get('/', async (req, res) => {
 
 app.use('/articles', articleRouter);
 
-app.listen(5000);
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('client/build'));
+}
+
+app.listen(PORT);
