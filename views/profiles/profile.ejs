@@ -11,18 +11,19 @@
 <body>
     <div class="container">
         <nav class="navbar navbar-light bg-light justify-content-between">
-          <a class="navbar-brand" href="/">Astro's Adventures</a>
+          <a class="navbar-brand" href="/profile">Astro's Adventures</a>
           <form class="form-inline">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
           </form>
-          <form action="/auth/signup" method="GET" class="form-inline">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Up</button>
-          </form>
-          <form action="/auth/login" method="GET" class="form-inline">
-            <button class="btn btn-sm btn-outline-secondary" type="submit">Login</button>
+          <form action="/auth/logout?_method=DELETE" method="post">
+            <button class="btn btn-danger my-2 my-sm-0" type="submit">Logout</button>
           </form>
         </nav>
+        <main>
+          <p>Welcome back to your profile, <%= user.username %></p>
+          <img src="<%= user.thumbnail %>" alt="profile picture">
+        </main>
         <h1 class="mb-4">Blog Articles</h1>
         <a href="/articles/new" class="btn btn-success">New Article</a>
         <% articles.forEach(article => { %>

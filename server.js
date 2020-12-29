@@ -7,23 +7,27 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const Article = require('./models/article');
 const articleRouter = require('./routes/articles');
+const authRouter = require('./routes/auth-routes')
+const profileRouter = require('./routes/profile-routes')
 const methodOverride = require('method-override');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const googleConfig = require('./config/passport-google-config');
 const flash = require('express-flash');
 const session = require('express-session');
-
-const initializePassport = require('./passport-config');
-initializePassport(
-    passport,
-    email => users.find(user => user.email === email),
-    id => users.find(user => user.id === id), 
-    );
+const User = require('./models/user')
 
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000
+
+const initialize = require('./config/passport-local-config')
+initialize(
+    passport,
+    email => User.findOne({email: email}),
+    id => User.findOne({id: id}), 
+    );
 
 app.use(cors());
 app.use(express.json());
@@ -49,8 +53,6 @@ connection.once("open", () => {
     console.log(('MongoDB database connection established'));
 });
 
-const users = []
-
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride('_method'));
@@ -60,56 +62,9 @@ app.get('/', async (req, res) => {
     res.render('articles/index', { articles: articles });
 });
 
-app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render('login')
-})
-
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-}))
-
-app.get('/signup', checkNotAuthenticated, (req, res) => {
-    res.render('signup')
-})
-
-app.post('/signup', checkNotAuthenticated, async (req, res) => {
-    try {
-      const hashedPassword = await bcrypt.hash(req.body.password, 10)
-      users.push({
-          id: Date.now().toString(),
-          email : req.body.email,
-          password: hashedPassword
-      })
-      res.redirect('/login')
-    } catch {
-        res.redirect('/register')
-    }
-})
-
-app.delete('/logout', (req, res) => {
-    req.logOut()
-    req.redirect('/login')
-})
-
 app.use('/articles', articleRouter);
-
-function checkAuthenticated(req, res, next) {
-    if (req.isAuthenticated()){
-        return next()
-    }
-
-    res.redirect('/login')
-}
-
-function checkNotAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return res.redirect('/')
-        }
-    
-    next()
-}
+app.use('/auth', authRouter)
+app.use('/profile', profileRouter)
 
 app.listen(PORT, () => {
     console.log('Server is running');
