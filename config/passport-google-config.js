@@ -17,7 +17,7 @@ passport.deserializeUser((id, done) => {
 passport.use(
     new GoogleStrategy({
     //options for the strategy
-    callbackURL: 'http://localhost:5000/auth/google/redirect',
+    callbackURL: 'https://express-markdown-blog.herokuapp.com/auth/google/redirect',
     clientID: keys.google.clientID,
     clientSecret: keys.google.clientSecret, 
     }, (accessToken, refreshToken, profile, done) => {
